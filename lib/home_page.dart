@@ -126,6 +126,7 @@ class HomePage extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.all(12),
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
                               children: [
@@ -142,15 +143,37 @@ class HomePage extends StatelessWidget {
                                   ),
                                   child: Text(noticia['categoria']),
                                 ),
-                                SizedBox(
+                                const SizedBox(
                                   width: 15,
                                 ),
-                                Text(noticia['data']),
+                                Text(
+                                  noticia['data'],
+                                  style: const TextStyle(
+                                    color: Color(0xFF858D96),
+                                  ),
+                                ),
                               ],
                             ),
-                            Text(noticia['titulo']),
                             const SizedBox(height: 8),
-                            Text(noticia['resumo']),
+                            Text(
+                              noticia['titulo'],
+                              style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF1b2A4A),
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              noticia['resumo'],
+                              style: const TextStyle(
+                                fontSize: 13,
+                              ),
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ],
                         ),
                       ),
