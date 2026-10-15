@@ -16,8 +16,8 @@ void main() {
           elevation: 4,
         ),
       ),
-      //home: const HomePage(),
-      home: const TesteApi(),
+      home: const HomePage(),
+      // home: const TesteApi(),
     ),
   );
 }
