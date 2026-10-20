@@ -25,11 +25,10 @@ class _HomePageState extends State<HomePage> {
   List<Noticia> aplicarFiltro(List<Noticia> noticias) {
     if (_textoPesquisa.isNotEmpty) {
       return noticias.where((noticia) {
-        final pesquisa = _textoPesquisa.toLowerCase();
-        final tituloContem = noticia.titulo.toLowerCase().contains(pesquisa);
-        final resumoContem = noticia.resumo.toLowerCase().contains(pesquisa);
-
-        return tituloContem || resumoContem;
+        return noticia.titulo.toLowerCase().contains(
+              _textoPesquisa.toLowerCase(),
+            ) ||
+            noticia.resumo.toLowerCase().contains(_textoPesquisa.toLowerCase());
       }).toList();
     }
     return noticias;
@@ -50,7 +49,7 @@ class _HomePageState extends State<HomePage> {
                 autofocus: true,
                 style: const TextStyle(
                   color: Colors.white,
-                ),
+                ), // Garante que o texto seja visível
                 decoration: const InputDecoration(
                   hintText: 'Pesquisar...',
                   hintStyle: TextStyle(color: Colors.white70),
@@ -59,6 +58,7 @@ class _HomePageState extends State<HomePage> {
                 onChanged: (valor) {
                   setState(() {
                     _textoPesquisa = valor;
+                    // TODO: Aqui você pode filtrar sua lista de notícias baseada em `_textoPesquisa`
                   });
                 },
               )
@@ -76,6 +76,7 @@ class _HomePageState extends State<HomePage> {
                   _buscando = !_buscando;
                   if (!_buscando) {
                     _textoPesquisa = '';
+                    // TODO: Recarregar a lista completa quando fechar a busca
                   }
                 });
               },
@@ -165,13 +166,8 @@ class _HomePageState extends State<HomePage> {
                 }
 
                 final todasNoticias = asyncSnapshot.data ?? [];
-                final noticias = aplicarFiltro(todasNoticias);
 
-                if (noticias.isEmpty) {
-                  return const Center(
-                    child: Text('Nenhuma notícia encontrada.'),
-                  );
-                }
+                final noticias = aplicarFiltro(todasNoticias);
 
                 return ListView.builder(
                   padding: const EdgeInsets.all(12),
@@ -217,6 +213,13 @@ class _HomePageState extends State<HomePage> {
                                       fit: BoxFit.cover,
                                       width: double.infinity,
                                       errorBuilder: (context, error, stack) {
+                                        debugPrint(
+                                          'URL da imagem: ${noticia.imagem}',
+                                        );
+                                        debugPrint(
+                                          'Erro ao carregar imagem: $error',
+                                        );
+
                                         return const Center(
                                           child: Icon(
                                             Icons.broken_image_outlined,
