@@ -1,6 +1,4 @@
-import '../models/noticia.dart';
-import '../services/noticias_service.dart';
-import '../sobre_page.dart';
+import '../detalhe_noticia_page.dart';
 import '../models/noticia.dart';
 import '../services/noticias_service.dart';
 import '../sobre_page.dart';
@@ -9,7 +7,7 @@ import 'package:flutter/material.dart';
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
-  static const List<String> categorias = ["Todas"];
+  static Null get categorias => null;
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -18,6 +16,24 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final NoticiasService _noticiasService = NoticiasService();
   late Future<List<Noticia>> _listaNoticia;
+
+  static const List<String> categorias = ["Todas"];
+
+  bool _buscando = false;
+  String _textoPesquisa = '';
+
+  List<Noticia> aplicarFiltro(List<Noticia> noticias) {
+    if (_textoPesquisa.isNotEmpty) {
+      return noticias.where((noticia) {
+        final pesquisa = _textoPesquisa.toLowerCase();
+        final tituloContem = noticia.titulo.toLowerCase().contains(pesquisa);
+        final resumoContem = noticia.resumo.toLowerCase().contains(pesquisa);
+
+        return tituloContem || resumoContem;
+      }).toList();
+    }
+    return noticias;
+  }
 
   @override
   void initState() {
@@ -29,15 +45,42 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Image.asset(
-          'assets/img/logotipo.png',
-          height: 22,
-        ),
+        title: _buscando
+            ? TextField(
+                autofocus: true,
+                style: const TextStyle(
+                  color: Colors.white,
+                ),
+                decoration: const InputDecoration(
+                  hintText: 'Pesquisar...',
+                  hintStyle: TextStyle(color: Colors.white70),
+                  border: InputBorder.none,
+                ),
+                onChanged: (valor) {
+                  setState(() {
+                    _textoPesquisa = valor;
+                  });
+                },
+              )
+            : Image.asset(
+                'assets/img/logotipo.png',
+                height: 20,
+              ),
         centerTitle: true,
         actions: [
-          const Padding(
-            padding: EdgeInsets.only(right: 12),
-            child: Icon(Icons.search),
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: IconButton(
+              onPressed: () {
+                setState(() {
+                  _buscando = !_buscando;
+                  if (!_buscando) {
+                    _textoPesquisa = '';
+                  }
+                });
+              },
+              icon: Icon(_buscando ? Icons.close : Icons.search),
+            ),
           ),
         ],
       ),
@@ -78,7 +121,7 @@ class _HomePageState extends State<HomePage> {
             child: ListView(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              children: HomePage.categorias.map((categoria) {
+              children: categorias.map((categoria) {
                 final selecionada = categoria == "Todas";
 
                 return Container(
@@ -121,7 +164,14 @@ class _HomePageState extends State<HomePage> {
                   );
                 }
 
-                final noticias = asyncSnapshot.data ?? [];
+                final todasNoticias = asyncSnapshot.data ?? [];
+                final noticias = aplicarFiltro(todasNoticias);
+
+                if (noticias.isEmpty) {
+                  return const Center(
+                    child: Text('Nenhuma notícia encontrada.'),
+                  );
+                }
 
                 return ListView.builder(
                   padding: const EdgeInsets.all(12),
@@ -129,78 +179,109 @@ class _HomePageState extends State<HomePage> {
                   itemBuilder: (context, index) {
                     final noticia = noticias[index];
 
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      elevation: 0,
-                      color: Colors.white,
-                      clipBehavior: Clip.antiAlias,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        side: const BorderSide(color: Color(0xFFCBD2D9)),
+                    return InkWell(
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              DetalheNoticiaPage(noticia: noticia),
+                        ),
                       ),
-                      child: Column(
-                        children: [
-                          Container(
-                            width: double.infinity,
-                            height: 120,
-                            color: const Color(0xFFE4E9EF),
-                            child: Image.network(
-                              noticia.imagem!,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, erro, stack) =>
-                                  Icon(Icons.image_outlined),
+                      child: Card(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        elevation: 0,
+                        color: Colors.white,
+                        clipBehavior: Clip.antiAlias,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          side: const BorderSide(color: Color(0xFFCBD2D9)),
+                        ),
+                        child: Column(
+                          children: [
+                            Container(
+                              width: double.infinity,
+                              height: 120,
+                              color: const Color(0xFFE4E9EF),
+                              child:
+                                  noticia.imagem == null ||
+                                      noticia.imagem!.isEmpty
+                                  ? const Center(
+                                      child: Icon(
+                                        Icons.image_not_supported_outlined,
+                                        size: 35,
+                                        color: Colors.grey,
+                                      ),
+                                    )
+                                  : Image.network(
+                                      noticia.imagem!,
+                                      fit: BoxFit.cover,
+                                      width: double.infinity,
+                                      errorBuilder: (context, error, stack) {
+                                        return const Center(
+                                          child: Icon(
+                                            Icons.broken_image_outlined,
+                                            size: 35,
+                                            color: Colors.grey,
+                                          ),
+                                        );
+                                      },
+                                    ),
                             ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFFEFF4F8),
-                                        borderRadius: BorderRadius.circular(10),
-                                        border: Border.all(
-                                          color: Colors.deepPurple,
+                            Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFEFF4F8),
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
+                                          border: Border.all(
+                                            color: Colors.deepPurple,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          noticia.categoriaNome,
                                         ),
                                       ),
-                                      child: Text(noticia.categoriaNome),
-                                    ),
-                                    const SizedBox(width: 15),
-                                    Text(
-                                      ' ${noticia.dataFormatada}',
-                                      style: const TextStyle(
-                                        color: Color(0xFF858D96),
+                                      const SizedBox(width: 15),
+                                      Text(
+                                        ' ${noticia.dataFormatada}',
+                                        style: const TextStyle(
+                                          color: Color(0xFF858D96),
+                                        ),
                                       ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    ' ${noticia.titulo}',
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                  ],
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  ' ${noticia.titulo}',
-                                  style: const TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.bold,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  ' ${noticia.resumo}',
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: Color(0xFF586879),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    ' ${noticia.resumo}',
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Color(0xFF586879),
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     );
                   },

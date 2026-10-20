@@ -1,7 +1,7 @@
-import 'package:app_noticias_tii/models/noticia.dart';
-import 'package:app_noticias_tii/services/noticias_service.dart';
+import '../services/noticias_service.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+
 import 'models/noticia.dart';
 
 class TesteApi extends StatefulWidget {
@@ -23,7 +23,7 @@ class _TesteApiState extends State<TesteApi> {
 
     List<Noticia> noticias = await _listaNoticias;
 
-    print("--- Teste No Console ---");
+    print('---Teste no console ---');
     print('Quantidade de notícias: ${noticias.length}');
   }
 
@@ -34,9 +34,9 @@ class _TesteApiState extends State<TesteApi> {
       );
 
       if (resposta.statusCode == 200) {
-        mensagem = 'Conectou Com Sucesso';
+        mensagem = 'Conectou com Sucesso';
       } else {
-        mensagem = 'Api respondeu com erro ${resposta.statusCode}';
+        mensagem = 'Api Respondeu com erro ${resposta.statusCode}';
       }
     } catch (erro) {
       mensagem = 'Não Conectou erro: $erro';
@@ -51,9 +51,17 @@ class _TesteApiState extends State<TesteApi> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            ElevatedButton(onPressed: testar, child: const Text('Testar API')),
-            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: testar,
+              child: const Text('Testar API'),
+            ),
+            const SizedBox(
+              height: 16,
+            ),
             Text(mensagem),
+            const SizedBox(
+              height: 50,
+            ),
             ElevatedButton(
               onPressed: carregarNoticias,
               child: const Text('Carregar Notícias'),

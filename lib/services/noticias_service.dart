@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:http/http.dart' as http;
 import '../models/noticia.dart';
 
@@ -16,7 +15,7 @@ class NoticiasService {
         throw Exception('Não foi possivel carregar as notícias');
       }
     } catch (e) {
-      throw Exception('Não foi possivel conectar erro: $e');
+      throw Exception('Não conectou erro: $e');
     }
   }
 }
