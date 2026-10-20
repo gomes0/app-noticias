@@ -47,18 +47,19 @@ class _HomePageState extends State<HomePage> {
         title: _buscando
             ? TextField(
                 autofocus: true,
+                cursorColor: Colors.black,
                 style: const TextStyle(
-                  color: Colors.white,
-                ), // Garante que o texto seja visível
+                  color: Colors.black,
+                  fontSize: 16,
+                ),
                 decoration: const InputDecoration(
                   hintText: 'Pesquisar...',
-                  hintStyle: TextStyle(color: Colors.white70),
+                  hintStyle: TextStyle(color: Colors.grey),
                   border: InputBorder.none,
                 ),
                 onChanged: (valor) {
                   setState(() {
                     _textoPesquisa = valor;
-                    // TODO: Aqui você pode filtrar sua lista de notícias baseada em `_textoPesquisa`
                   });
                 },
               )
@@ -76,7 +77,6 @@ class _HomePageState extends State<HomePage> {
                   _buscando = !_buscando;
                   if (!_buscando) {
                     _textoPesquisa = '';
-                    // TODO: Recarregar a lista completa quando fechar a busca
                   }
                 });
               },
@@ -166,8 +166,13 @@ class _HomePageState extends State<HomePage> {
                 }
 
                 final todasNoticias = asyncSnapshot.data ?? [];
-
                 final noticias = aplicarFiltro(todasNoticias);
+
+                if (noticias.isEmpty) {
+                  return const Center(
+                    child: Text('Nenhuma notícia encontrada.'),
+                  );
+                }
 
                 return ListView.builder(
                   padding: const EdgeInsets.all(12),
@@ -213,13 +218,6 @@ class _HomePageState extends State<HomePage> {
                                       fit: BoxFit.cover,
                                       width: double.infinity,
                                       errorBuilder: (context, error, stack) {
-                                        debugPrint(
-                                          'URL da imagem: ${noticia.imagem}',
-                                        );
-                                        debugPrint(
-                                          'Erro ao carregar imagem: $error',
-                                        );
-
                                         return const Center(
                                           child: Icon(
                                             Icons.broken_image_outlined,
