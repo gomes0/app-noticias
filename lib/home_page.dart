@@ -1,13 +1,13 @@
+import 'package:flutter/material.dart';
+import 'package:app_noticias_tii/models/categoria.dart';
+import 'package:app_noticias_tii/services/categorias_service.dart';
 import '../detalhe_noticia_page.dart';
 import '../models/noticia.dart';
 import '../services/noticias_service.dart';
 import '../sobre_page.dart';
-import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
-
-  static Null get categorias => null;
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -16,28 +16,58 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final NoticiasService _noticiasService = NoticiasService();
   late Future<List<Noticia>> _listaNoticia;
+  final CategoriasService _categoriaService = CategoriasService();
 
-  static const List<String> categorias = ["Todas"];
+  List<Categoria> _listaCategoria = [];
+
+  // Variável que estava em falta para controlar a categoria selecionada
+  String _categoriaSelecionada = "Todas";
 
   bool _buscando = false;
   String _textoPesquisa = '';
 
+  Future<void> carregarCategorias() async {
+    try {
+      final categorias = await _categoriaService.getCategorias();
+
+      if (!mounted) return;
+
+      setState(() {
+        _listaCategoria = categorias;
+      });
+    } catch (e) {
+      debugPrint('Erro ao carregar categorias: $e');
+    }
+  }
+
   List<Noticia> aplicarFiltro(List<Noticia> noticias) {
+    // Filtrar por categoria selecionada (se for diferente de "Todas")
+    var noticiasFiltradas = noticias;
+    if (_categoriaSelecionada != "Todas") {
+      noticiasFiltradas = noticiasFiltradas.where((noticia) {
+        return noticia.categoriaNome.toLowerCase() ==
+            _categoriaSelecionada.toLowerCase();
+      }).toList();
+    }
+
+    // Filtrar por texto de pesquisa
     if (_textoPesquisa.isNotEmpty) {
-      return noticias.where((noticia) {
+      return noticiasFiltradas.where((noticia) {
         return noticia.titulo.toLowerCase().contains(
               _textoPesquisa.toLowerCase(),
             ) ||
             noticia.resumo.toLowerCase().contains(_textoPesquisa.toLowerCase());
       }).toList();
     }
-    return noticias;
+
+    return noticiasFiltradas;
   }
 
   @override
   void initState() {
     super.initState();
     _listaNoticia = _noticiasService.getNoticias();
+    carregarCategorias();
   }
 
   @override
@@ -119,34 +149,57 @@ class _HomePageState extends State<HomePage> {
         children: [
           SizedBox(
             height: 45,
-            child: ListView(
+            child: ListView.builder(
+              itemCount: _listaCategoria.length + 1,
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              children: categorias.map((categoria) {
-                final selecionada = categoria == "Todas";
+              itemBuilder: (context, index) {
+                final categoria = index == 0
+                    ? 'Todas'
+                    : _listaCategoria[index - 1].nome;
+                final selecionada = _categoriaSelecionada == categoria;
 
-                return Container(
-                  margin: const EdgeInsets.only(right: 8),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(15),
-                    border: Border.all(
-                      color: selecionada
-                          ? Colors.black
-                          : const Color(0xFFEDEDED),
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _categoriaSelecionada = categoria;
+                    });
+                  },
+                  child: InkWell(
+                    onTap: () {
+                      setState(() {
+                        _categoriaSelecionada = categoria;
+                      });
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(right: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(15),
+                        border: Border.all(
+                          color: selecionada
+                              ? Colors.black
+                              : const Color(0xFFEDEDED),
+                        ),
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        categoria,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: selecionada
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                        ),
+                      ),
                     ),
                   ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    categoria,
-                    style: const TextStyle(fontSize: 12),
-                  ),
                 );
-              }).toList(),
+              },
             ),
           ),
           Expanded(
@@ -236,6 +289,10 @@ class _HomePageState extends State<HomePage> {
                                   Row(
                                     children: [
                                       Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 2,
+                                        ),
                                         decoration: BoxDecoration(
                                           color: const Color(0xFFEFF4F8),
                                           borderRadius: BorderRadius.circular(
@@ -247,20 +304,22 @@ class _HomePageState extends State<HomePage> {
                                         ),
                                         child: Text(
                                           noticia.categoriaNome,
+                                          style: const TextStyle(fontSize: 10),
                                         ),
                                       ),
                                       const SizedBox(width: 15),
                                       Text(
-                                        ' ${noticia.dataFormatada}',
+                                        noticia.dataFormatada,
                                         style: const TextStyle(
                                           color: Color(0xFF858D96),
+                                          fontSize: 12,
                                         ),
                                       ),
                                     ],
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
-                                    ' ${noticia.titulo}',
+                                    noticia.titulo,
                                     style: const TextStyle(
                                       fontSize: 15,
                                       fontWeight: FontWeight.bold,
@@ -270,7 +329,7 @@ class _HomePageState extends State<HomePage> {
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
-                                    ' ${noticia.resumo}',
+                                    noticia.resumo,
                                     style: const TextStyle(
                                       fontSize: 12,
                                       color: Color(0xFF586879),
