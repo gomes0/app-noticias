@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
@@ -17,22 +18,39 @@ class LoginService {
         final dados = jsonDecode(resposta.body);
 
         final String token = dados['token'];
-        final String nome = dados['usuario'];
+        final String nome = dados['usuario']['nome'];
 
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('token', token);
         await prefs.setString('nome', nome);
-
         return nome;
       }
+
       if (resposta.statusCode == 401 || resposta.statusCode == 422) {
-        throw Exception('E-mail ou senha inválidos');
+        throw Exception('E-mail ou Senha inválidos');
       }
-      throw Exception('Erro ao realizar o login');
+
+      throw Exception('Erro ao realizar login');
     } on http.ClientException {
       throw Exception('Não foi possível conectar ao Servidor');
     } on FormatException {
-      throw Exception('Resposta invalida do Servidor');
+      throw Exception('Resposta inválida do servidor');
     }
+  }
+
+  Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('token');
+    await prefs.remove('nome');
+  }
+
+  Future<String?> getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('token');
+  }
+
+  Future<String?> getNome() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('nome');
   }
 }

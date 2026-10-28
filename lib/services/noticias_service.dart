@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:http/http.dart' as http;
 import '../models/noticia.dart';
 
@@ -12,7 +13,7 @@ class NoticiasService {
         final List dados = jsonDecode(resposta.body);
         return dados.map((item) => Noticia.fromJson(item)).toList();
       } else {
-        throw ('Não foi possivel carregar as notícias');
+        throw 'Não foi possivel carregar as notícias';
       }
     } catch (e) {
       throw Exception('$e');

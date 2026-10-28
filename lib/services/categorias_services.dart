@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:http/http.dart' as http;
 import '../models/categoria.dart';
 
@@ -12,7 +13,7 @@ class CategoriasService {
         final List dados = jsonDecode(resposta.body);
         return dados.map((item) => Categoria.fromJson(item)).toList();
       } else {
-        throw Exception('Não foi possível carregar as categorias');
+        throw Exception('Não foi possivel carregar as categorias');
       }
     } catch (e) {
       throw Exception('Não conectou erro: $e');

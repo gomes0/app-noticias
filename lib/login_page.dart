@@ -1,4 +1,4 @@
-import 'package:app_noticias_tii/services/login_service.dart';
+import 'package:app_noticias/services/login_service.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatefulWidget {
@@ -31,15 +31,15 @@ class _LoginPageState extends State<LoginPage> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Usuário: $nome está logado!'),
+          content: Text('Usuário: $nome logado com sucesso!'),
           duration: const Duration(seconds: 3),
           backgroundColor: Colors.green,
         ),
       );
-      Navigator.pop(context);
+      Navigator.pop(context, true);
     } catch (e) {
       setState(() {
-        _mensagemErro = e.toString().replaceFirst('Exception: ', '');
+        _mensagemErro = e.toString().replaceFirst('Exception', '');
       });
     } finally {
       setState(() {
@@ -52,7 +52,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Login'),
+        title: const Text('Entrar'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
@@ -62,21 +62,13 @@ class _LoginPageState extends State<LoginPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Icon(
-                Icons.account_circle,
+                Icons.person,
                 size: 100,
-                color: Colors.grey,
+                color: Color(0xFFEDEDED),
               ),
               const SizedBox(
-                height: 15,
+                height: 20,
               ),
-              if (_mensagemErro != null) ...[
-                Text(
-                  _mensagemErro!,
-                  style: const TextStyle(color: Colors.red),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 15),
-              ],
               TextField(
                 controller: _emailController,
                 decoration: const InputDecoration(
@@ -92,9 +84,19 @@ class _LoginPageState extends State<LoginPage> {
                 obscureText: true,
                 decoration: const InputDecoration(
                   labelText: 'Senha',
+
                   border: OutlineInputBorder(),
                 ),
               ),
+              const SizedBox(
+                height: 10,
+              ),
+              if (_mensagemErro != null) ...[
+                Text(
+                  _mensagemErro!,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ],
               const SizedBox(
                 height: 20,
               ),
