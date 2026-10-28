@@ -1,4 +1,5 @@
-import 'package:app_noticias/services/login_service.dart';
+import '../services/login_service.dart';
+import 'package:app_noticias_tii/services/login_service.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatefulWidget {
