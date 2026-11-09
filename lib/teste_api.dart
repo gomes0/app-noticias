@@ -1,7 +1,6 @@
 import '../services/noticias_service.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-
 import 'models/noticia.dart';
 
 class TesteApi extends StatefulWidget {
@@ -19,7 +18,7 @@ class _TesteApiState extends State<TesteApi> {
   late Future<List<Noticia>> _listaNoticias;
 
   Future<void> carregarNoticias() async {
-    _listaNoticias = _noticiasService.getNoticias();
+    _listaNoticias = _noticiasService.getNoticia();
 
     List<Noticia> noticias = await _listaNoticias;
 

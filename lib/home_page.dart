@@ -30,7 +30,7 @@ class _HomePageState extends State<HomePage> {
   bool _logado = false;
 
   void carregarDados() {
-    _listaNoticias = _noticiasService.getNoticias();
+    _listaNoticias = _noticiasService.getNoticia();
     carregarCategorias();
   }
 
