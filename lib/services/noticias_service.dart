@@ -29,6 +29,7 @@ class NoticiasService {
     required String resumo,
     required String conteudo,
     required int categoriaId,
+    required bool status,
     File? imagemArquivo,
   }) async {
     try {
@@ -50,11 +51,18 @@ class NoticiasService {
       request.fields['resumo'] = resumo;
       request.fields['conteudo'] = conteudo;
       request.fields['categoria_id'] = categoriaId.toString();
+      request.fields['status'] = status ? '1' : '0';
       request.files.add(
         await http.MultipartFile.fromPath('imagem', imagemArquivo.path),
       );
 
       final resposta = await request.send();
+
+      final corpoResposta = await resposta.stream.bytesToString();
+
+      print('Status: ${resposta.statusCode}');
+
+      print('Resposta da API: $corpoResposta');
 
       if (resposta.statusCode != 200 && resposta.statusCode != 201) {
         throw Exception('Não foi possível cadastrar a notícia.');
@@ -70,6 +78,7 @@ class NoticiasService {
     required String resumo,
     required String conteudo,
     required int categoriaId,
+    required bool status,
     File? imagemArquivo,
   }) async {
     try {
@@ -85,6 +94,7 @@ class NoticiasService {
       request.fields['titulo'] = titulo;
       request.fields['resumo'] = resumo;
       request.fields['conteudo'] = conteudo;
+      request.fields['status'] = status ? '1' : '0';
       request.fields['categoria_id'] = categoriaId.toString();
 
       if (imagemArquivo != null) {
@@ -94,6 +104,12 @@ class NoticiasService {
       }
 
       final resposta = await request.send();
+
+      final corpoResposta = await resposta.stream.bytesToString();
+
+      print('Status: ${resposta.statusCode}');
+
+      print('Resposta da API: $corpoResposta');
 
       if (resposta.statusCode != 200) {
         throw Exception('Não foi possível editar a notícia.');
@@ -105,5 +121,25 @@ class NoticiasService {
 
   String _limparErro(Object e) {
     return e.toString().replaceFirst('Exception: ', '');
+  }
+
+  Future<void> excluirNoticia(int id) async {
+    try {
+      final token = _loginService.getToken();
+
+      final resposta = await http.delete(
+        Uri.parse('$baseUrl/noticias/$id'),
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (resposta.statusCode != 204) {
+        throw Exception('Não foi possível excluir a notícia.');
+      }
+    } catch (e) {
+      throw Exception('$e');
+    }
   }
 }
