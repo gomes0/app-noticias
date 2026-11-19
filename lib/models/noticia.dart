@@ -7,6 +7,7 @@ class Noticia {
   final String categoriaNome;
   final String? imagem;
   final DateTime createdAt;
+  final bool status;
 
   Noticia({
     required this.id,
@@ -17,6 +18,7 @@ class Noticia {
     required this.categoriaNome,
     required this.imagem,
     required this.createdAt,
+    this.status = true,
   });
 
   factory Noticia.fromJson(Map<String, dynamic> json) {
@@ -29,7 +31,18 @@ class Noticia {
       categoriaNome: json['categoria_nome'],
       imagem: json['imagem'],
       createdAt: DateTime.parse(json['created_at']),
+      status: _converterStatus(json['status']),
     );
+  }
+
+  // Aceita true/false, 1/0 ou "1"/"0" vindos da API.
+  // Se a API não enviar o campo, considera ativa.
+  static bool _converterStatus(dynamic valor) {
+    if (valor == null) return true;
+    if (valor is bool) return valor;
+    if (valor is num) return valor == 1;
+    if (valor is String) return valor == '1' || valor.toLowerCase() == 'true';
+    return true;
   }
 
   //07/05/2026
